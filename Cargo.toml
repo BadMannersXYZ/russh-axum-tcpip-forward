@@ -1,0 +1,25 @@
+[package]
+authors = ["Bad Manners <me@badmanners.xyz>"]
+description = "Remote port forwarding (reverse tunneling) with Russh to serve an Axum application."
+name = "russh-axum-tcpip-forward"
+version = "0.1.0"
+edition = "2021"
+keywords = ["ssh"]
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1.0.86"
+async-trait = "0.1"
+axum = "0.7.5"
+clap = { version = "4.5.17", features = ["derive"] }
+futures = "0.3.30"
+hyper = { version = "1", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full"] }
+russh = "0.45"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = { version = "0.1.15", features = ["net", "sync"] }
+tokio-util = "0.7.11"
+tower = "0.5.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.18" }
