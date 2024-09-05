@@ -4,7 +4,7 @@ description = "Remote port forwarding (reverse tunneling) with Russh to serve an
 name = "russh-axum-tcpip-forward"
 version = "0.1.0"
 edition = "2021"
-keywords = ["ssh"]
+keywords = ["ssh", "http", "async", "demo"]
 license = "MIT"
 readme = "README.md"
 
