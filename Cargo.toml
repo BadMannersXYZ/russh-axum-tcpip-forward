@@ -18,6 +18,7 @@ http = "1.1.0"
 hyper = { version = "1", features = ["full"] }
 hyper-util = { version = "0.1", features = ["full"] }
 russh = "0.45"
+termsize = "0.1.9"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1.15", features = ["net", "sync"] }
 tokio-util = "0.7.11"
