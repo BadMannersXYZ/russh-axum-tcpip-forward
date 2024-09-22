@@ -1,7 +1,10 @@
 use std::{
     iter,
     path::PathBuf,
-    sync::{Arc, LazyLock, Mutex},
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Arc, LazyLock,
+    },
     time::Duration,
 };
 
@@ -127,25 +130,19 @@ async fn main() -> Result<()> {
 
 #[derive(Clone)]
 struct AppState {
-    data: Arc<Mutex<usize>>,
-}
-
-/// A function that creates our Axum router.
-fn router_factory(state: AppState) -> Router {
-    Router::new().route("/", get(hello)).with_state(state)
+    data: Arc<AtomicUsize>,
 }
 
 /// A lazily-created Router, to be used by the SSH client tunnels.
 static ROUTER: LazyLock<Router> = LazyLock::new(|| {
-    router_factory(AppState {
-        data: Arc::new(Mutex::new(0)),
+    Router::new().route("/", get(hello)).with_state(AppState {
+        data: Arc::new(AtomicUsize::new(1)),
     })
 });
 
 /// A basic example endpoint that includes shared state.
 async fn hello(State(state): State<AppState>) -> String {
-    let mut request_id = state.data.lock().unwrap();
-    *request_id += 1;
+    let request_id = state.data.fetch_add(1, Ordering::AcqRel);
     debug!(id = %request_id, "GET /");
     format!("Hello, request #{}!", request_id)
 }
@@ -169,8 +166,7 @@ impl TcpForwardSession {
         config: Arc<Config>,
         secret_key: Arc<KeyPair>,
     ) -> Result<Self> {
-        let span = debug_span!("TcpForwardSession.connect");
-        let _enter = span;
+        let _span = debug_span!("TcpForwardSession.connect");
         debug!("TcpForwardSession connecting...");
         let client = Client {};
         let mut session = client::connect(Arc::clone(&config), (host, port), client)
@@ -200,8 +196,7 @@ impl TcpForwardSession {
         remote_port: u16,
         request_pty: Option<&str>,
     ) -> Result<u32> {
-        let span = debug_span!("TcpForwardSession.start");
-        let _enter = span;
+        let _span = debug_span!("TcpForwardSession.start");
         self.session
             .tcpip_forward(remote_host, remote_port.into())
             .await
@@ -363,8 +358,7 @@ impl client::Handler for Client {
         originator_port: u32,
         session: &mut Session,
     ) -> Result<(), Self::Error> {
-        let span = debug_span!("server_channel_open_forwarded_tcpip");
-        let _enter = span.enter();
+        let _span = debug_span!("server_channel_open_forwarded_tcpip");
         debug!(
             sshid = %String::from_utf8_lossy(session.remote_sshid()),
             connected_address = connected_address,
